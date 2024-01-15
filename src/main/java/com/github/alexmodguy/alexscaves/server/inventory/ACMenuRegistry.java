@@ -1,0 +1,17 @@
+package com.github.alexmodguy.alexscaves.server.inventory;
+
+import com.github.alexmodguy.alexscaves.AlexsCaves;
+
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+public class ACMenuRegistry {
+
+    public static final DeferredRegister<MenuType<?>> DEF_REG = DeferredRegister.create(ForgeRegistries.MENU_TYPES, AlexsCaves.MODID);
+
+    public static final RegistryObject<MenuType<SpelunkeryTableMenu>> SPELUNKERY_TABLE_MENU = DEF_REG.register("spelunkery_table_menu", () -> new MenuType<SpelunkeryTableMenu>(SpelunkeryTableMenu::new));
+    public static final RegistryObject<MenuType<NuclearFurnaceMenu>> NUCLEAR_FURNACE_MENU = DEF_REG.register("nuclear_furnace_menu", () -> new MenuType<NuclearFurnaceMenu>(NuclearFurnaceMenu::new));
+
+}

@@ -1,0 +1,37 @@
+package com.github.alexmodguy.alexscaves.client.render.entity;
+
+import com.github.alexmodguy.alexscaves.AlexsCaves;
+import com.github.alexmodguy.alexscaves.client.model.TremorsaurusModel;
+import com.github.alexmodguy.alexscaves.client.render.entity.layer.TremorsaurusHeldMobLayer;
+import com.github.alexmodguy.alexscaves.client.render.entity.layer.TremorsaurusRiderLayer;
+import com.github.alexmodguy.alexscaves.server.entity.living.TremorsaurusEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
+
+public class TremorsaurusRenderer extends MobRenderer<TremorsaurusEntity, TremorsaurusModel> {
+    private static final ResourceLocation TEXTURE = new ResourceLocation("alexscaves:textures/entity/tremorsaurus.png");
+    private static final ResourceLocation TEXTURE_PRINCESS = new ResourceLocation("alexscaves:textures/entity/tremorsaurus_princess.png");
+    private static final ResourceLocation TEXTURE_RETRO = new ResourceLocation("alexscaves:textures/entity/tremorsaurus_retro.png");
+
+    public TremorsaurusRenderer(EntityRendererProvider.Context renderManagerIn) {
+        super(renderManagerIn, new TremorsaurusModel(), 1.1F);
+        this.addLayer(new TremorsaurusRiderLayer(this));
+        this.addLayer(new TremorsaurusHeldMobLayer(this));
+    }
+
+    protected void scale(TremorsaurusEntity mob, PoseStack matrixStackIn, float partialTicks) {
+    	if(AlexsCaves.CLIENT_CONFIG.renderingOffsetFixes.get()) {
+        	matrixStackIn.translate(0, mob.isBaby() ? -0.055F : -1F, 0);
+    	}
+    }
+
+    public ResourceLocation getTextureLocation(TremorsaurusEntity entity) {
+        return entity.hasCustomName() && "princess".equalsIgnoreCase(entity.getName().getString()) ? TEXTURE_PRINCESS : entity.isRetro() ? TEXTURE_RETRO : TEXTURE;
+    }
+
+
+}
+

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "UUU",
+    "UBU",
+    "UUU"
+  ],
+  "key": {
+    "U": {
+      "item": "alexscaves:unrefined_waste"
+    },
+    "B": {
+      "item": "alexscaves:metal_barrel"
+    }
+  },
+  "result": {
+    "item": "alexscaves:waste_drum"
+  }
+}

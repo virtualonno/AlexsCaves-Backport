@@ -1,0 +1,52 @@
+{
+  "required": true,
+  "package": "com.github.alexmodguy.alexscaves.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "target": "@env(DEFAULT)",
+  "refmap": "alexscaves.refmap.json",
+  "mixins": [
+    "AbstractArrowMixin",
+    "AbstractMinecartMixin",
+    "CoralFeatureMixin",
+    "EntityMixin",
+    "FallingBlockEntityMixin",
+    "FoodDataMixin",
+    "FrogMixin",
+    "KelpFeatureMixin",
+    "LivingEntityMixin",
+    "MultifaceGrowthFeatureMixin",
+    "NaturalSpawnerMixin",
+    "OceanMonumentStructureMixin",
+    "SeagrassFeatureMixin",
+    "ShipwreckStructureMixin",
+    "MultiNoiseBiomeSourceMixin",
+    "ChunkStatusMixin"
+  ],
+  "client": [
+    "client.BiomeAmbientSoundsHandlerInstanceMixin",
+    "client.BiomeAmbientSoundsHandlerMixin",
+    "client.CameraMixin",
+    "client.ClientChunkCacheStorageMixin",
+    "client.ClientLevelDataMixin",
+    "client.ClientLevelMixin",
+    "client.ClientPacketListenerMixin",
+    "client.GameRendererMixin",
+    "client.HumanoidArmorLayerMixin",
+    "client.ItemFrameRendererMixin",
+    "client.ItemInHandRendererMixin",
+    "client.LevelRendererMixin",
+    "client.LightTextureMixin",
+    "client.LiquidBlockRendererMixin",
+    "client.LocalPlayerMixin",
+    "client.MinecraftMixin",
+    "client.OptionsMixin",
+    "client.RidingMinecartSoundInstanceMixin",
+    "client.SoundEngineMixin",
+    "client.UnderwaterAmbientSoundHandlerMixin",
+    "client.UnderwaterAmbientSoundInstancesMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

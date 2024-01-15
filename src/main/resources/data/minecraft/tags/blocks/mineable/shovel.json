@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "alexscaves:metal_swarf",
+    "alexscaves:unrefined_waste",
+    "alexscaves:muck",
+    "alexscaves:guano_block",
+    "alexscaves:guano_layer"
+  ]
+}

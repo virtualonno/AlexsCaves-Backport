@@ -1,0 +1,186 @@
+package com.github.alexmodguy.alexscaves.server.item;
+
+import java.awt.Color;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import com.github.alexmodguy.alexscaves.AlexsCaves;
+import com.github.alexmodguy.alexscaves.server.level.biome.ACBiomeRegistry;
+import com.github.alexmodguy.alexscaves.server.misc.ACCreativeTabRegistry;
+import com.github.alexmodguy.alexscaves.server.misc.CaveBookProgress;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+
+public class CaveInfoItem extends Item {
+
+    private boolean hideCaveId;
+
+    public CaveInfoItem(Properties properties, boolean hideCaveId) {
+        super(properties);
+        this.hideCaveId = hideCaveId;
+    }
+    
+    @Override
+    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> list) {
+    	if(tab == ACCreativeTabRegistry.MAGNETIC_CAVES)
+    	{
+    		if(this == ACItemRegistry.CAVE_TABLET.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_TABLET.get(), ACBiomeRegistry.MAGNETIC_CAVES));
+    		}
+    		else if(this == ACItemRegistry.CAVE_CODEX.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_CODEX.get(), ACBiomeRegistry.MAGNETIC_CAVES));
+    		}
+    	}
+    	else if(tab == ACCreativeTabRegistry.PRIMORDIAL_CAVES)
+    	{
+    		if(this == ACItemRegistry.CAVE_TABLET.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_TABLET.get(), ACBiomeRegistry.PRIMORDIAL_CAVES));
+    		}
+    		else if(this == ACItemRegistry.CAVE_CODEX.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_CODEX.get(), ACBiomeRegistry.PRIMORDIAL_CAVES));
+    		}
+    	}
+    	else if(tab == ACCreativeTabRegistry.TOXIC_CAVES)
+    	{
+    		if(this == ACItemRegistry.CAVE_TABLET.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_TABLET.get(), ACBiomeRegistry.TOXIC_CAVES));
+    		}
+    		else if(this == ACItemRegistry.CAVE_CODEX.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_CODEX.get(), ACBiomeRegistry.TOXIC_CAVES));
+    		}
+    	}
+    	else if(tab == ACCreativeTabRegistry.ABYSSAL_CHASM)
+    	{
+    		if(this == ACItemRegistry.CAVE_TABLET.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_TABLET.get(), ACBiomeRegistry.ABYSSAL_CHASM));
+    		}
+    		else if(this == ACItemRegistry.CAVE_CODEX.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_CODEX.get(), ACBiomeRegistry.ABYSSAL_CHASM));
+    		}
+    	}
+    	else if(tab == ACCreativeTabRegistry.FORLORN_HOLLOWS)
+    	{
+    		if(this == ACItemRegistry.CAVE_TABLET.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_TABLET.get(), ACBiomeRegistry.FORLORN_HOLLOWS));
+    		}
+    		else if(this == ACItemRegistry.CAVE_CODEX.get())
+    		{
+    			list.add(CaveInfoItem.create(ACItemRegistry.CAVE_CODEX.get(), ACBiomeRegistry.FORLORN_HOLLOWS));
+    		}
+    	}
+    }
+
+    public static int getBiomeColorOf(Level level, ItemStack stack) {
+        if (stack.getTag() != null && stack.getTag().getBoolean("Rainbow")) {
+            float hue = (System.currentTimeMillis() % 4000) / 4000f;
+            int rainbow = Color.HSBtoRGB(hue, 1f, 0.8f);
+            return rainbow;
+        }
+        if (stack.getItem() instanceof CaveInfoItem) {
+            ResourceKey<Biome> biomeResourceKey = getCaveBiome(stack);
+            if(biomeResourceKey == null){
+                int selectedBiomeIndex = (int)(ACBiomeRegistry.ALEXS_CAVES_BIOMES.size() * (System.currentTimeMillis() % 4000) / 4000f);
+                biomeResourceKey = ACBiomeRegistry.ALEXS_CAVES_BIOMES.get(selectedBiomeIndex);
+            }
+            return biomeResourceKey == null ? -1 : getBiomeColor(level, biomeResourceKey);
+        }
+        return -1;
+    }
+
+    private static int getBiomeColor(Level level, ResourceKey<Biome> biomeResourceKey){
+        int color = ACBiomeRegistry.getBiomeTabletColor(biomeResourceKey);
+        if (color == -1) {
+            if (level != null) {
+                Registry<Biome> registry = level.registryAccess().registry(Registry.BIOME_REGISTRY).orElse(null);
+                if (registry != null && registry.getHolder(biomeResourceKey).isPresent()) {
+                    return registry.getHolder(biomeResourceKey).get().value().getFoliageColor();
+                }
+            }
+            return 0;
+        } else {
+            return color;
+        }
+    }
+
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack itemstack = player.getItemInHand(hand);
+        ResourceKey<Biome> biomeResourceKey = getCaveBiome(itemstack);
+        if(itemstack.is(ACItemRegistry.CAVE_CODEX.get()) && biomeResourceKey != null){
+            String biomeStr = biomeResourceKey.location().toString();
+            CaveBookProgress progress = CaveBookProgress.getCaveBookProgress(player);
+            if(progress.unlockNextFor(biomeStr)){
+                player.swing(hand);
+                if(!level.isClientSide){
+                    CaveBookProgress.saveCaveBookProgress(progress, player);
+                    CaveBookProgress.Subcategory subcategory = progress.getLastUnlockedCategory(biomeStr);
+                    Component biomeTitle = Component.translatable("biome." + biomeResourceKey.location().toString().replace(":", "."));
+                    if(AlexsCaves.COMMON_CONFIG.onlyOneResearchNeeded.get()){
+                        player.displayClientMessage(Component.translatable("item.alexscaves.cave_codex.add_all", biomeTitle), true);
+                    }else{
+                        player.displayClientMessage(Component.translatable("item.alexscaves.cave_codex.add", biomeTitle, Component.translatable("item.alexscaves.cave_book." + subcategory.toString().toLowerCase())), true);
+                    }
+                }
+                if(!player.isCreative()){
+                    itemstack.shrink(1);
+                }
+                player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP);
+                return InteractionResultHolder.consume(itemstack);
+            }else{
+                player.displayClientMessage(Component.translatable("item.alexscaves.cave_codex.end").withStyle(ChatFormatting.RED), true);
+            }
+        }
+        return InteractionResultHolder.pass(itemstack);
+    }
+
+    public static ItemStack create(Item item, ResourceKey<Biome> biomeResourceKey) {
+        ItemStack map = new ItemStack(item);
+        CompoundTag tag = new CompoundTag();
+        tag.putString("CaveBiome", biomeResourceKey.location().toString());
+        map.setTag(tag);
+        return map;
+    }
+
+
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        ResourceKey<Biome> biomeResourceKey = getCaveBiome(stack);
+        if (biomeResourceKey != null && !this.hideCaveId) {
+            String biomeName = "biome." + biomeResourceKey.location().toString().replace(":", ".");
+            tooltip.add(Component.translatable(biomeName).withStyle(ChatFormatting.GRAY));
+        }
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    }
+
+    public static ResourceKey<Biome> getCaveBiome(ItemStack stack) {
+        if (stack.getTag() != null) {
+            String s = stack.getTag().getString("CaveBiome");
+            return s == null ? null : ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(s));
+        }
+        return null;
+    }
+}

@@ -1,0 +1,32 @@
+package com.github.alexmodguy.alexscaves.client.render.entity;
+
+import com.github.alexmodguy.alexscaves.AlexsCaves;
+import com.github.alexmodguy.alexscaves.client.model.RelicheirusModel;
+import com.github.alexmodguy.alexscaves.client.render.entity.layer.RelicheirusHeldTrilocarisLayer;
+import com.github.alexmodguy.alexscaves.server.entity.living.RelicheirusEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
+
+public class RelicheirusRenderer extends MobRenderer<RelicheirusEntity, RelicheirusModel> {
+    private static final ResourceLocation TEXTURE = new ResourceLocation("alexscaves:textures/entity/relicheirus.png");
+    private static final ResourceLocation TEXTURE_RETRO = new ResourceLocation("alexscaves:textures/entity/relicheirus_retro.png");
+
+    public RelicheirusRenderer(EntityRendererProvider.Context renderManagerIn) {
+        super(renderManagerIn, new RelicheirusModel(), 1.0F);
+        this.addLayer(new RelicheirusHeldTrilocarisLayer(this));
+    }
+
+    protected void scale(RelicheirusEntity mob, PoseStack matrixStackIn, float partialTicks) {
+    	if(AlexsCaves.CLIENT_CONFIG.renderingOffsetFixes.get()) {
+    		matrixStackIn.translate(0, mob.isBaby() ? -0.055F : -1F, 0);
+    	}
+    }
+
+    public ResourceLocation getTextureLocation(RelicheirusEntity entity) {
+        return entity.isRetro() ? TEXTURE_RETRO : TEXTURE;
+    }
+}
+

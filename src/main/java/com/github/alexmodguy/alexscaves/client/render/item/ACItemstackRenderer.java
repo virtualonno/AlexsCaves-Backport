@@ -1,0 +1,316 @@
+package com.github.alexmodguy.alexscaves.client.render.item;
+
+import com.github.alexmodguy.alexscaves.AlexsCaves;
+import com.github.alexmodguy.alexscaves.client.gui.book.widget.ItemWidget;
+import com.github.alexmodguy.alexscaves.client.model.BeholderModel;
+import com.github.alexmodguy.alexscaves.client.model.CopperValveModel;
+import com.github.alexmodguy.alexscaves.client.model.DreadbowModel;
+import com.github.alexmodguy.alexscaves.client.model.GalenaGauntletModel;
+import com.github.alexmodguy.alexscaves.client.model.LimestoneSpearModel;
+import com.github.alexmodguy.alexscaves.client.model.OrtholanceModel;
+import com.github.alexmodguy.alexscaves.client.model.PrimitiveClubModel;
+import com.github.alexmodguy.alexscaves.client.model.RaygunModel;
+import com.github.alexmodguy.alexscaves.client.model.ResistorShieldModel;
+import com.github.alexmodguy.alexscaves.client.model.SeaStaffModel;
+import com.github.alexmodguy.alexscaves.client.model.SirenLightModel;
+import com.github.alexmodguy.alexscaves.client.render.ACRenderTypes;
+import com.github.alexmodguy.alexscaves.server.block.ACBlockRegistry;
+import com.github.alexmodguy.alexscaves.server.item.ACItemRegistry;
+import com.github.alexmodguy.alexscaves.server.item.DreadbowItem;
+import com.github.alexmodguy.alexscaves.server.item.GalenaGauntletItem;
+import com.github.alexmodguy.alexscaves.server.item.RaygunItem;
+import com.github.alexmodguy.alexscaves.server.item.ResistorShieldItem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+
+public class ACItemstackRenderer extends BlockEntityWithoutLevelRenderer {
+    private static final ResourceLocation GALENA_GAUNTLET_TEXTURE = new ResourceLocation("alexscaves:textures/entity/galena_gauntlet.png");
+    private static final ResourceLocation GALENA_GAUNTLET_RED_TEXTURE = new ResourceLocation("alexscaves:textures/entity/galena_gauntlet_red.png");
+    private static final ResourceLocation GALENA_GAUNTLET_BLUE_TEXTURE = new ResourceLocation("alexscaves:textures/entity/galena_gauntlet_blue.png");
+    private static final GalenaGauntletModel GALENA_GAUNTLET_RIGHT_MODEL = new GalenaGauntletModel(false);
+    private static final GalenaGauntletModel GALENA_GAUNTLET_LEFT_MODEL = new GalenaGauntletModel(true);
+    private static final ResourceLocation RESISTOR_SHIELD_TEXTURE = new ResourceLocation("alexscaves:textures/entity/resistor_shield.png");
+    private static final ResourceLocation RESISTOR_SHIELD_RED_TEXTURE = new ResourceLocation("alexscaves:textures/entity/resistor_shield_red.png");
+    private static final ResourceLocation RESISTOR_SHIELD_BLUE_TEXTURE = new ResourceLocation("alexscaves:textures/entity/resistor_shield_blue.png");
+    private static final ResistorShieldModel RESISTOR_SHIELD_MODEL = new ResistorShieldModel();
+    private static final ResourceLocation PRIMITIVE_CLUB_TEXTURE = new ResourceLocation("alexscaves:textures/entity/primitive_club.png");
+    private static final PrimitiveClubModel PRIMITIVE_CLUB_MODEL = new PrimitiveClubModel();
+    private static final ResourceLocation LIMESTONE_SPEAR_TEXTURE = new ResourceLocation("alexscaves:textures/entity/limestone_spear.png");
+    private static final LimestoneSpearModel LIMESTONE_SPEAR_MODEL = new LimestoneSpearModel();
+    private static final ResourceLocation SIREN_LIGHT_TEXTURE = new ResourceLocation(AlexsCaves.MODID, "textures/entity/siren_light.png");
+    private static final ResourceLocation SIREN_LIGHT_COLOR_TEXTURE = new ResourceLocation(AlexsCaves.MODID, "textures/entity/siren_light_color.png");
+    private static final SirenLightModel SIREN_LIGHT_MODEL = new SirenLightModel();
+    private static final ResourceLocation RAYGUN_TEXTURE = new ResourceLocation("alexscaves:textures/entity/raygun.png");
+    private static final ResourceLocation RAYGUN_ACTIVE_TEXTURE = new ResourceLocation("alexscaves:textures/entity/raygun_active.png");
+    private static final RaygunModel RAYGUN_MODEL = new RaygunModel();
+    private static final ResourceLocation SEA_STAFF_TEXTURE = new ResourceLocation("alexscaves:textures/entity/deep_one/sea_staff.png");
+    private static final SeaStaffModel SEA_STAFF_MODEL = new SeaStaffModel();
+    private static final ResourceLocation ORTHOLANCE_TEXTURE = new ResourceLocation("alexscaves:textures/entity/deep_one/ortholance.png");
+    private static final OrtholanceModel ORTHOLANCE_MODEL = new OrtholanceModel();
+    private static final ResourceLocation COPPER_VALVE_TEXTURE = new ResourceLocation(AlexsCaves.MODID, "textures/entity/copper_valve.png");
+    private static final CopperValveModel COPPER_VALVE_MODEL = new CopperValveModel();
+    private static final BeholderModel BEHOLDER_MODEL = new BeholderModel();
+    private static final ResourceLocation BEHOLDER_TEXTURE = new ResourceLocation(AlexsCaves.MODID, "textures/entity/beholder.png");
+    private static final ResourceLocation BEHOLDER_TEXTURE_EYE = new ResourceLocation(AlexsCaves.MODID, "textures/entity/beholder_eye.png");
+    private static final ResourceLocation DREADBOW_TEXTURE = new ResourceLocation("alexscaves:textures/entity/dreadbow.png");
+    private static final ResourceLocation DREADBOW_TEXTURE_EYE = new ResourceLocation("alexscaves:textures/entity/dreadbow_eye.png");
+    private static final DreadbowModel DREADBOW_MODEL = new DreadbowModel();
+    public static boolean sepiaFlag = false;
+
+    private Entity renderedDreadbowArrow = null;
+
+    public ACItemstackRenderer() {
+        super(null, null);
+    }
+
+    @Override
+    public void renderByItem(ItemStack itemStackIn, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
+        ClientLevel level = Minecraft.getInstance().level;
+        float partialTick = Minecraft.getInstance().getPartialTick();
+        boolean heldIn3d = transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND;
+        boolean left = transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND;
+        if (itemStackIn.is(ACItemRegistry.GALENA_GAUNTLET.get())) {
+            poseStack.pushPose();
+            poseStack.translate(0, 0F, 0);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(-180));
+            float openAmount = GalenaGauntletItem.getLerpedUseTime(itemStackIn, partialTick) / 5F;
+            float closeAmount = 1F - openAmount;
+            float ageInTicks = Minecraft.getInstance().player == null ? 0F : Minecraft.getInstance().player.tickCount + partialTick;
+            if (left || transformType == ItemTransforms.TransformType.GUI) {
+                GALENA_GAUNTLET_LEFT_MODEL.setupAnim(null, openAmount, 0, ageInTicks, 0, 0);
+                GALENA_GAUNTLET_LEFT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(GALENA_GAUNTLET_TEXTURE), GALENA_GAUNTLET_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                GALENA_GAUNTLET_LEFT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(GALENA_GAUNTLET_BLUE_TEXTURE), GALENA_GAUNTLET_BLUE_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, openAmount);
+                GALENA_GAUNTLET_LEFT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(GALENA_GAUNTLET_RED_TEXTURE), GALENA_GAUNTLET_RED_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, closeAmount);
+            } else {
+                GALENA_GAUNTLET_RIGHT_MODEL.setupAnim(null, openAmount, 0, ageInTicks, 0, 0);
+                GALENA_GAUNTLET_RIGHT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(GALENA_GAUNTLET_TEXTURE), GALENA_GAUNTLET_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                GALENA_GAUNTLET_RIGHT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(GALENA_GAUNTLET_BLUE_TEXTURE), GALENA_GAUNTLET_BLUE_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, openAmount);
+                GALENA_GAUNTLET_RIGHT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(GALENA_GAUNTLET_RED_TEXTURE), GALENA_GAUNTLET_RED_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, closeAmount);
+            }
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACItemRegistry.RESISTOR_SHIELD.get())) {
+            poseStack.pushPose();
+            poseStack.translate(0, 0.25F, 0.125F);
+            float useTime = ResistorShieldItem.getLerpedUseTime(itemStackIn, partialTick);
+            float useProgress = Math.min(10F, useTime) / 10F;
+            float useProgressTurn = Math.min(useProgress * 4F, 1F);
+            float useProgressUp = (float) Math.sin(useProgress * Math.PI);
+            float switchProgress = ResistorShieldItem.getLerpedSwitchTime(itemStackIn, partialTick) / 5F;
+            float leftOffset = left ? -1F : 1F;
+            if (transformType.firstPerson()) {
+                poseStack.translate(useProgressTurn * 0.2F * leftOffset, useProgressUp, 0);
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(useProgressTurn * -10));
+            } else if (heldIn3d) {
+                poseStack.translate(useProgressTurn * 0.4F * leftOffset, useProgress * -0.1F, useProgressTurn * -0.2F);
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees(useProgressTurn * 10 * leftOffset));
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(useProgressTurn * 80 * leftOffset));
+            }
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            RESISTOR_SHIELD_MODEL.setupAnim(null, useProgress, switchProgress, 0, 0, 0);
+            RESISTOR_SHIELD_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(RESISTOR_SHIELD_TEXTURE), RESISTOR_SHIELD_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            RESISTOR_SHIELD_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(RESISTOR_SHIELD_RED_TEXTURE), RESISTOR_SHIELD_RED_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, switchProgress);
+            RESISTOR_SHIELD_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(RESISTOR_SHIELD_BLUE_TEXTURE), RESISTOR_SHIELD_BLUE_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F - switchProgress);
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACItemRegistry.PRIMITIVE_CLUB.get())) {
+            poseStack.translate(0.5F, 0.5f, 0.5f);
+            ItemStack spriteItem = new ItemStack(ACItemRegistry.PRIMITIVE_CLUB_SPRITE.get());
+            spriteItem.setTag(itemStackIn.getTag());
+            if (heldIn3d) {
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+                poseStack.translate(0, -1.15F, -0.1F);
+                if (transformType.firstPerson()) {
+                    poseStack.translate(0, 0.1F, 0);
+                    poseStack.scale(0.8F, 0.8F, 0.8F);
+                }
+                VertexConsumer vertexconsumer = ItemRenderer.getArmorFoilBuffer(bufferIn, RenderType.armorCutoutNoCull(PRIMITIVE_CLUB_TEXTURE), false, itemStackIn.hasFoil());
+                PRIMITIVE_CLUB_MODEL.renderToBuffer(poseStack, vertexconsumer, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                poseStack.popPose();
+            } else {
+                renderStaticItemSprite(spriteItem, transformType, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, level);
+            }
+        }
+
+        if (itemStackIn.is(ACItemRegistry.LIMESTONE_SPEAR.get())) {
+            poseStack.translate(0.5F, 0.5f, 0.5f);
+            ItemStack spriteItem = new ItemStack(ACItemRegistry.LIMESTONE_SPEAR_SPRITE.get());
+            spriteItem.setTag(itemStackIn.getTag());
+            if (heldIn3d) {
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+                poseStack.translate(0, -0.85F, -0.1F);
+                if (transformType.firstPerson()) {
+                    poseStack.translate(0, 0.5F, 0F);
+                    poseStack.scale(0.75F, 0.75F, 0.75F);
+                }
+                VertexConsumer vertexconsumer = ItemRenderer.getArmorFoilBuffer(bufferIn, RenderType.armorCutoutNoCull(LIMESTONE_SPEAR_TEXTURE), false, itemStackIn.hasFoil());
+                LIMESTONE_SPEAR_MODEL.renderToBuffer(poseStack, vertexconsumer, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                poseStack.popPose();
+            } else {
+                renderStaticItemSprite(spriteItem, transformType, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, level);
+            }
+        }
+
+        if (itemStackIn.is(ACBlockRegistry.SIREN_LIGHT.get().asItem())) {
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 1.5F, 0.5F);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            SIREN_LIGHT_MODEL.resetToDefaultPose();
+            SIREN_LIGHT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(SIREN_LIGHT_TEXTURE), SIREN_LIGHT_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            SIREN_LIGHT_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityTranslucent(SIREN_LIGHT_COLOR_TEXTURE), SIREN_LIGHT_COLOR_TEXTURE), combinedLightIn, combinedOverlayIn, 0.0F, 1.0F, 0.0F, 1.0F);
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACItemRegistry.RAYGUN.get())) {
+            float ageInTicks = Minecraft.getInstance().player == null ? 0F : Minecraft.getInstance().player.tickCount + partialTick;
+            float useAmount = RaygunItem.getLerpedUseTime(itemStackIn, partialTick) / 5F;
+            float pulseAlpha = useAmount * (0.25F + 0.25F * (float) (1F + Math.sin(ageInTicks * 0.8F)));
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 1.5F, 0.5F);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(180));
+            poseStack.pushPose();
+            poseStack.scale(0.9F, 0.9F, 0.9F);
+            RAYGUN_MODEL.setupAnim(null, useAmount, ageInTicks,  0, 0, 0);
+            RAYGUN_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(RAYGUN_TEXTURE), RAYGUN_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            RAYGUN_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, ACRenderTypes.getEyesAlphaEnabled(RAYGUN_ACTIVE_TEXTURE), RAYGUN_ACTIVE_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, pulseAlpha);
+            poseStack.popPose();
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACItemRegistry.SEA_STAFF.get())) {
+            poseStack.translate(0.5F, 0.5f, 0.5f);
+            ItemStack spriteItem = new ItemStack(ACItemRegistry.SEA_STAFF_SPRITE.get());
+            spriteItem.setTag(itemStackIn.getTag());
+            if (heldIn3d) {
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+                poseStack.translate(0, -0.5F, 0);
+                if (transformType.firstPerson()) {
+                    poseStack.scale(0.6F, 0.6F, 0.6F);
+                }
+                VertexConsumer vertexconsumer = ItemRenderer.getArmorFoilBuffer(bufferIn, RenderType.armorCutoutNoCull(SEA_STAFF_TEXTURE), false, itemStackIn.hasFoil());
+                SEA_STAFF_MODEL.renderToBuffer(poseStack, vertexconsumer, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                poseStack.popPose();
+            } else {
+                renderStaticItemSprite(spriteItem, transformType, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, level);
+            }
+        }
+
+        if (itemStackIn.is(ACItemRegistry.ORTHOLANCE.get())) {
+            poseStack.translate(0.5F, 0.5f, 0.5f);
+            ItemStack spriteItem = new ItemStack(ACItemRegistry.ORTHOLANCE_SPRITE.get());
+            spriteItem.setTag(itemStackIn.getTag());
+            if (heldIn3d) {
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+                poseStack.translate(0, -1.1F, 0);
+                if (transformType.firstPerson()) {
+                    poseStack.scale(0.6F, 1F, 0.6F);
+                }
+                VertexConsumer vertexconsumer = getVertexConsumerFoil(bufferIn, RenderType.armorCutoutNoCull(ORTHOLANCE_TEXTURE), ORTHOLANCE_TEXTURE, itemStackIn.hasFoil());
+                ORTHOLANCE_MODEL.renderToBuffer(poseStack, vertexconsumer, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                poseStack.popPose();
+            } else {
+                renderStaticItemSprite(spriteItem, transformType, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, level);
+            }
+        }
+
+        if (itemStackIn.is(ACBlockRegistry.COPPER_VALVE.get().asItem())) {
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 1.5F, 0.5F);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            COPPER_VALVE_MODEL.resetToDefaultPose();
+            COPPER_VALVE_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(COPPER_VALVE_TEXTURE), COPPER_VALVE_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACBlockRegistry.BEHOLDER.get().asItem())) {
+            float ageInTicks = Minecraft.getInstance().player == null ? 0F : Minecraft.getInstance().player.tickCount + partialTick;
+            poseStack.pushPose();
+            poseStack.translate(0.5F, 1.5F, 0.5F);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            BEHOLDER_MODEL.setupAnim(null, 0.0F, 45F, ageInTicks, 0, 0);
+            BEHOLDER_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.entityCutoutNoCull(BEHOLDER_TEXTURE),BEHOLDER_TEXTURE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            BEHOLDER_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.eyes(BEHOLDER_TEXTURE_EYE), BEHOLDER_TEXTURE_EYE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+            poseStack.popPose();
+        }
+
+        if (itemStackIn.is(ACItemRegistry.DREADBOW.get())) {
+            float ageInTicks = Minecraft.getInstance().player == null ? 0F : Minecraft.getInstance().player.tickCount + partialTick;
+            float pullAmount = DreadbowItem.getPullingAmount(itemStackIn, partialTick);
+            poseStack.translate(0.5F, 0.5f, 0.5f);
+            ItemStack spriteItem = new ItemStack(pullAmount >= 0.8F ? ACItemRegistry.DREADBOW_PULLING_2_SPRITE.get() : pullAmount >= 0.5F ? ACItemRegistry.DREADBOW_PULLING_1_SPRITE.get() : pullAmount > 0.0F ? ACItemRegistry.DREADBOW_PULLING_0_SPRITE.get() : ACItemRegistry.DREADBOW_SPRITE.get());
+            spriteItem.setTag(itemStackIn.getTag());
+            if (heldIn3d) {
+                poseStack.pushPose();
+                if (transformType.firstPerson()) {
+                    poseStack.translate(left ? -0.1F : 0.1F, 0.1F, -0.1F);
+                    poseStack.scale(0.5F, 0.5F, 0.5F);
+                    poseStack.mulPose(Vector3f.XP.rotationDegrees(15));
+                }else{
+                    poseStack.translate(left ? 0.1F : -0.1F, -0.45F, 0.35F - pullAmount * 0.3F);
+                    poseStack.mulPose(Vector3f.YP.rotationDegrees(left ? 7 : -7));
+                }
+                EntityType type = DreadbowItem.getTypeOfArrow(itemStackIn);
+                DREADBOW_MODEL.setupAnim(null, pullAmount, ageInTicks,  0, 0, 0);
+                if(Minecraft.getInstance().player != null && Minecraft.getInstance().player.isUsingItem() && pullAmount > 0 && type != null && Minecraft.getInstance().level != null){
+                    if(renderedDreadbowArrow == null || renderedDreadbowArrow.getType() != type){
+                        renderedDreadbowArrow = type.create(Minecraft.getInstance().level);
+                    }
+                    EntityRenderDispatcher manager = Minecraft.getInstance().getEntityRenderDispatcher();
+                    poseStack.pushPose();
+                    DREADBOW_MODEL.translateToBowString(poseStack);
+                    poseStack.mulPose(Vector3f.XP.rotationDegrees(180));
+                    poseStack.mulPose(Vector3f.YP.rotationDegrees(left ? 7 : -7));
+                    poseStack.translate(0, 0.0F, 0.75F);
+                    manager.render(renderedDreadbowArrow, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, bufferIn, DreadbowItem.isConvertibleArrow (renderedDreadbowArrow) ? (int) (Math.round(240 * (1F - pullAmount))) : combinedLightIn);
+                    poseStack.popPose();
+                }
+                VertexConsumer vertexconsumer = getVertexConsumerFoil(bufferIn, RenderType.entityCutoutNoCull(DREADBOW_TEXTURE), DREADBOW_TEXTURE, itemStackIn.hasFoil());
+                DREADBOW_MODEL.renderToBuffer(poseStack, vertexconsumer, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                DREADBOW_MODEL.renderToBuffer(poseStack, getVertexConsumer(bufferIn, RenderType.eyes(DREADBOW_TEXTURE_EYE), DREADBOW_TEXTURE_EYE), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
+                poseStack.popPose();
+            } else {
+                renderStaticItemSprite(spriteItem, transformType, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, level);
+            }
+        }
+
+    }
+
+    private void renderStaticItemSprite(ItemStack spriteItem, ItemTransforms.TransformType transformType, int combinedLightIn, int combinedOverlayIn, PoseStack poseStack, MultiBufferSource bufferIn, ClientLevel level) {
+        if(sepiaFlag){
+            BakedModel bakedmodel = Minecraft.getInstance().getItemRenderer().getModel(spriteItem, Minecraft.getInstance().level, null, 0);
+            ItemWidget.renderSepiaItem(poseStack, bakedmodel, spriteItem, Minecraft.getInstance().renderBuffers().bufferSource());
+        }else{
+            Minecraft.getInstance().getItemRenderer().renderStatic(spriteItem, transformType, transformType == ItemTransforms.TransformType.GROUND ? combinedLightIn : 240, combinedOverlayIn, poseStack, bufferIn, 0);
+        }
+    }
+
+    private static VertexConsumer getVertexConsumerFoil(MultiBufferSource bufferIn, RenderType _default, ResourceLocation resourceLocation, boolean foil){
+        return sepiaFlag ? bufferIn.getBuffer(ACRenderTypes.getBookWidget(resourceLocation, true)) : ItemRenderer.getArmorFoilBuffer(bufferIn, _default, false, foil);
+    }
+    private static VertexConsumer getVertexConsumer(MultiBufferSource bufferIn, RenderType _default, ResourceLocation resourceLocation){
+        return sepiaFlag ? bufferIn.getBuffer(ACRenderTypes.getBookWidget(resourceLocation, true)) : bufferIn.getBuffer(_default);
+    }
+}

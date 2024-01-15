@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "alexscaves:galena_wall",
+    "alexscaves:galena_brick_wall",
+    "alexscaves:limestone_wall",
+    "alexscaves:smooth_limestone_wall",
+    "alexscaves:radrock_wall",
+    "alexscaves:radrock_brick_wall",
+    "alexscaves:cinder_block_wall",
+    "alexscaves:abyssmarine_wall",
+    "alexscaves:abyssmarine_brick_wall",
+    "alexscaves:smooth_bone_wall",
+    "alexscaves:guanostone_wall",
+    "alexscaves:guanostone_brick_wall",
+    "alexscaves:coprolith_wall",
+    "alexscaves:smooth_coprolith_wall"
+  ]
+}
